@@ -30,8 +30,6 @@ const PopularRestaurants = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [popularRestaurants, setPopularRestaurants] = useState<any>(null);
-  const [allCuisines, setAllCuisines] = useState<any[]>([]);
-  const [availableCuisines, setAvailableCuisines] = useState<Set<string>>(new Set());
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationChecked, setLocationChecked] = useState(false);
   const [filters, setFilters] = useState<RestaurantFilterOptions>({
@@ -62,21 +60,6 @@ const PopularRestaurants = () => {
     }
   }, []);
 
-  /* Fetch cuisines for hierarchical filtering */
-  useEffect(() => {
-    const fetchCuisines = async () => {
-      const { data: cuisines } = await supabase
-        .from('cuisines')
-        .select('*')
-        .eq('is_active', true);
-      
-      if (cuisines) {
-        setAllCuisines(cuisines);
-      }
-    };
-    
-    fetchCuisines();
-  }, []);
 
   /* Fetch popular restaurants from all users */
   useEffect(() => {
@@ -122,28 +105,7 @@ const PopularRestaurants = () => {
           }
         });
 
-        // Extract ALL unique cuisines from ALL restaurants that have visits (all time)
-        // This ensures users can see all available cuisines when filtering
-        const cuisineSet = new Set<string>();
-        
-        restaurants?.forEach((restaurant: any) => {
-          // Always normalize to ensure consistent format
-          const normalized = normalizeCuisines(restaurant.cuisines);
-          
-          if (normalized && Array.isArray(normalized) && normalized.length > 0) {
-            // Extract ALL cuisines from this restaurant
-            normalized.forEach((cuisine: string) => {
-              if (cuisine && typeof cuisine === "string") {
-                const trimmed = cuisine.trim();
-                if (trimmed) {
-                  cuisineSet.add(trimmed);
-                }
-              }
-            });
-          }
-        });
-        
-        setAvailableCuisines(cuisineSet); // Set available cuisines from restaurants with visits
+        // Don't set available cuisines here - will be set from filtered restaurants
 
         // Store data for filtering
         const restaurantData = {
@@ -275,65 +237,6 @@ const PopularRestaurants = () => {
       });
     }
 
-    /* Filter by category (cuisines) - hierarchical filtering */
-    if (filters.cuisines !== 'Any') {
-      const selectedCuisine = filters.cuisines.trim();
-      
-      // Find all cuisine names that match or are children of the selected cuisine
-      const matchingCuisineNames = new Set<string>();
-      
-      allCuisines.forEach(cuisine => {
-        if (cuisine.name === selectedCuisine) {
-          matchingCuisineNames.add(cuisine.name);
-        } else {
-          for (let i = 1; i <= 5; i++) {
-            if (cuisine[`cuisine_category_${i}`] === selectedCuisine) {
-              matchingCuisineNames.add(cuisine.name);
-              break;
-            }
-          }
-        }
-      });
-      
-      filtered = filtered.filter(restaurant => {
-        /* Extract cuisines from restaurant - cuisines are stored as string arrays */
-        if (!restaurant.cuisines || !Array.isArray(restaurant.cuisines) || restaurant.cuisines.length === 0) {
-          return false;
-        }
-        
-        // Check if any of the restaurant's cuisines match the selected cuisine or its children
-        // Use case-insensitive matching to handle variations
-        return restaurant.cuisines.some((cuisine: string) => {
-          const trimmed = cuisine?.trim();
-          if (!trimmed) return false;
-          
-          // Direct match (case-insensitive)
-          if (matchingCuisineNames.has(trimmed)) return true;
-          
-          // Case-insensitive check
-          for (const match of matchingCuisineNames) {
-            if (trimmed.toLowerCase() === match.toLowerCase()) {
-              return true;
-            }
-          }
-          
-          return false;
-        });
-      });
-    }
-
-    // Filter by rating range (using overall rating from all users)
-    // Only filter if rating range is not the full range (0-5), or if restaurant has a rating
-    filtered = filtered.filter(restaurant => {
-      // If restaurant has no rating, include it unless filters explicitly exclude it
-      if (!restaurant.avgRating) {
-        // Include restaurants without ratings if the filter allows it (ratingRange includes 0)
-        return filters.ratingRange[0] === 0;
-      }
-      // If restaurant has a rating, check if it's within the range
-      return restaurant.avgRating >= filters.ratingRange[0] && 
-             restaurant.avgRating <= filters.ratingRange[1];
-    });
 
     // Sort restaurants
     filtered.sort((a, b) => {
@@ -369,7 +272,7 @@ const PopularRestaurants = () => {
     });
 
     return filtered;
-  }, [popularRestaurants, filters, allCuisines, userLocation, locationChecked]);
+  }, [popularRestaurants, filters, userLocation, locationChecked]);
 
   const StarRating = ({ rating }: { rating: number | null }) => {
     return (
@@ -438,7 +341,8 @@ const PopularRestaurants = () => {
                 hasLocation={!!userLocation}
                 showTimePeriod={true}
                 enableDistanceFilter={false}
-                availableCuisines={availableCuisines}
+                hideCuisineFilter={true}
+                hideRatingFilter={true}
                 customSortOptions={[
                   { value: 'popularity', label: 'Popularity' },
                   { value: 'rating', label: 'Rating' },
@@ -475,15 +379,8 @@ const PopularRestaurants = () => {
             <Card className="restaurant-card">
               <CardContent className="p-6 space-y-3 text-center">
                 <p className="text-muted-foreground">
-                  No restaurants match your current filters.
+                  No restaurants found.
                 </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setFilters({ ...filters, cuisines: 'Any', ratingRange: [0, 5] })}
-                >
-                  Reset Filters
-                </Button>
               </CardContent>
             </Card>
           )}

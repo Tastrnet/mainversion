@@ -207,12 +207,7 @@ const AllUserRatings = () => {
                 <p className="text-sm text-muted-foreground">{restaurant.name}</p>
               )}
             </div>
-            {reviews.length > 0 && (
-              <RestaurantReviewFilterButton
-                filters={filters}
-                onFiltersChange={setFilters}
-              />
-            )}
+            <div className="w-10 h-10" />
           </div>
         </div>
 

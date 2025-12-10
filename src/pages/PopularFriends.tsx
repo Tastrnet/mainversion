@@ -24,8 +24,6 @@ const PopularFriends = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [popularRestaurants, setPopularRestaurants] = useState<any>(null);
-  const [allCuisines, setAllCuisines] = useState<any[]>([]);
-  const [availableCuisines, setAvailableCuisines] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState<RestaurantFilterOptions>({
     sortBy: 'popularity',
     cuisines: 'Any',
@@ -33,21 +31,6 @@ const PopularFriends = () => {
     timePeriod: 'month'
   });
 
-  /* Fetch cuisines for hierarchical filtering */
-  useEffect(() => {
-    const fetchCuisines = async () => {
-      const { data: cuisines } = await supabase
-        .from('cuisines')
-        .select('*')
-        .eq('is_active', true);
-      
-      if (cuisines) {
-        setAllCuisines(cuisines);
-      }
-    };
-    
-    fetchCuisines();
-  }, []);
 
   /* Fetch popular restaurants from friends */
   useEffect(() => {
@@ -119,28 +102,7 @@ const PopularFriends = () => {
           }
         });
 
-        // Extract ALL unique cuisines from ALL restaurants that have visits (all time)
-        // This ensures users can see all available cuisines when filtering
-        const cuisineSet = new Set<string>();
-        
-        restaurants?.forEach((restaurant: any) => {
-          // Always normalize to ensure consistent format
-          const normalized = normalizeCuisines(restaurant.cuisines);
-          
-          if (normalized && Array.isArray(normalized) && normalized.length > 0) {
-            // Extract ALL cuisines from this restaurant
-            normalized.forEach((cuisine: string) => {
-              if (cuisine && typeof cuisine === "string") {
-                const trimmed = cuisine.trim();
-                if (trimmed) {
-                  cuisineSet.add(trimmed);
-                }
-              }
-            });
-          }
-        });
-        
-        setAvailableCuisines(cuisineSet); // Set available cuisines from restaurants with visits
+        // Don't set available cuisines here - will be set from filtered restaurants
 
         // Store data for filtering
         const restaurantData = {
@@ -243,59 +205,6 @@ const PopularFriends = () => {
 
     let filtered = Array.from(restaurantMap.values());
 
-    /* Filter by category (cuisines) - hierarchical filtering */
-    if (filters.cuisines !== 'Any') {
-      const selectedCuisine = filters.cuisines.trim();
-      
-      // Find all cuisine names that match or are children of the selected cuisine
-      const matchingCuisineNames = new Set<string>();
-      
-      allCuisines.forEach(cuisine => {
-        if (cuisine.name === selectedCuisine) {
-          matchingCuisineNames.add(cuisine.name);
-        } else {
-          for (let i = 1; i <= 5; i++) {
-            if (cuisine[`cuisine_category_${i}`] === selectedCuisine) {
-              matchingCuisineNames.add(cuisine.name);
-              break;
-            }
-          }
-        }
-      });
-      
-      filtered = filtered.filter(restaurant => {
-        /* Extract cuisines from restaurant - cuisines are stored as string arrays */
-        if (!restaurant.cuisines || !Array.isArray(restaurant.cuisines) || restaurant.cuisines.length === 0) {
-          return false;
-        }
-        
-        // Check if any of the restaurant's cuisines match the selected cuisine or its children
-        // Use case-insensitive matching to handle variations
-        return restaurant.cuisines.some((cuisine: string) => {
-          const trimmed = cuisine?.trim();
-          if (!trimmed) return false;
-          
-          // Direct match (case-insensitive)
-          if (matchingCuisineNames.has(trimmed)) return true;
-          
-          // Case-insensitive check
-          for (const match of matchingCuisineNames) {
-            if (trimmed.toLowerCase() === match.toLowerCase()) {
-              return true;
-            }
-          }
-          
-          return false;
-        });
-      });
-    }
-
-    // Filter by rating range (using overall rating from all users)
-    filtered = filtered.filter(restaurant => {
-      if (!restaurant.avgRating) return false;
-      return restaurant.avgRating >= filters.ratingRange[0] && 
-             restaurant.avgRating <= filters.ratingRange[1];
-    });
 
     // Sort restaurants
     filtered.sort((a, b) => {
@@ -322,7 +231,7 @@ const PopularFriends = () => {
     });
 
     return filtered;
-  }, [popularRestaurants, filters, allCuisines]);
+  }, [popularRestaurants, filters]);
 
   const StarRating = ({ rating }: { rating: number | null }) => {
     if (!rating) return <span className="text-xs text-muted-foreground">No rating</span>;
@@ -389,7 +298,8 @@ const PopularFriends = () => {
                 filters={filters}
                 onFiltersChange={setFilters}
                 showTimePeriod={true}
-                availableCuisines={availableCuisines}
+                hideCuisineFilter={true}
+                hideRatingFilter={true}
                 customSortOptions={[
                   { value: 'popularity', label: 'Popularity' },
                   { value: 'rating', label: 'Rating' },

@@ -59,9 +59,10 @@ const getMatchingCuisineNames = (selectedCuisine: string, cuisinePaths: CuisineP
   return Array.from(matches);
 };
 
-const SEARCH_RADIUS_KM = 10;
+// No distance limit - show all restaurants sorted by distance (database has less than 500 restaurants)
+const SEARCH_RADIUS_KM = 20000; // 20,000 km - effectively no limit
 const SEARCH_RADIUS_METERS = SEARCH_RADIUS_KM * 1000;
-const RPC_FETCH_LIMIT = 1000; // Increased to ensure we get all nearby restaurants for cuisine extraction
+const RPC_FETCH_LIMIT = 500; // Fetch all restaurants (database has less than 500)
 const MAX_DISPLAY_RESULTS = 15;
 
 const DEFAULT_FILTERS: RestaurantFilterOptions = {
@@ -258,22 +259,13 @@ const NearbyRestaurants = () => {
     }
 
     const fetchBoundingBox = async (matchSet?: Set<string>) => {
-      const latDelta = SEARCH_RADIUS_KM / 111;
-      const lngDelta =
-        SEARCH_RADIUS_KM /
-        (111 * Math.max(Math.cos((userLocation.lat * Math.PI) / 180), 0.1));
-
+      // No bounding box filter - fetch all restaurants (database has less than 500)
       // Use columns correctly: latitude column has latitude, longitude column has longitude
       let query = supabase
         .from("restaurants")
         .select("*")
         .not("latitude", "is", null)
-        .not("longitude", "is", null)
-        // Use columns correctly for bounding box filter
-        .gte("latitude", userLocation.lat - latDelta)   // latitude column has lat values
-        .lte("latitude", userLocation.lat + latDelta)   // latitude column has lat values
-        .gte("longitude", userLocation.lng - lngDelta) // longitude column has lng values
-        .lte("longitude", userLocation.lng + lngDelta); // longitude column has lng values
+        .not("longitude", "is", null);
 
       const { data, error } = await query;
 

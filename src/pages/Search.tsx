@@ -33,6 +33,23 @@ const Search = () => {
     ratingRange: [0, 5],
     distance: undefined
   });
+  
+  // Update sortBy based on location availability
+  useEffect(() => {
+    if (locationChecked) {
+      if (userLocation) {
+        // Location available - use distance sorting
+        if (filters.sortBy !== 'distance') {
+          setFilters(prev => ({ ...prev, sortBy: 'distance' }));
+        }
+      } else {
+        // No location - use popularity sorting
+        if (filters.sortBy !== 'popularity') {
+          setFilters(prev => ({ ...prev, sortBy: 'popularity' }));
+        }
+      }
+    }
+  }, [locationChecked, userLocation]);
 
   /* Restaurant search function - search restaurants from database */
   const searchRestaurants = useCallback(
@@ -151,139 +168,189 @@ const Search = () => {
     }
   }, []);
 
-  // Load nearby restaurants when there's no search query (same logic as NearbyRestaurants page)
+  // Load restaurants when there's no search query
   useEffect(() => {
-    const fetchNearbyRestaurantsList = async () => {
-      if (!userLocation || searchQuery.trim().length > 0) {
-        // Only fetch nearby restaurants when there's no search query
+    const fetchRestaurantsList = async () => {
+      if (searchQuery.trim().length > 0 || !locationChecked) {
+        // Only fetch when there's no search query and location is checked
         return;
       }
 
       try {
-        const SEARCH_RADIUS_METERS = 10 * 1000; // 10km same as NearbyRestaurants
-        const RPC_FETCH_LIMIT = 1000;
+        if (userLocation) {
+          // Location available - fetch nearby restaurants (no distance limit)
+          const SEARCH_RADIUS_METERS = 20000000; // 20,000 km - effectively no limit
+          const RPC_FETCH_LIMIT = 500;
 
-        // Use the same fetchNearbyRestaurants function as NearbyRestaurants page
-        let nearbyData: NearbyRestaurant[] = [];
-        try {
-          nearbyData = await fetchNearbyRestaurants(
-            userLocation.lat,
-            userLocation.lng,
-            SEARCH_RADIUS_METERS,
-            RPC_FETCH_LIMIT,
-            undefined // No cuisine filter
-          );
-        } catch (rpcError) {
-          console.warn("RPC fetch failed, trying bounding box:", rpcError);
-          nearbyData = [];
-        }
-
-        // Fallback to bounding box query (same as NearbyRestaurants)
-        const latDelta = 10 / 111; // 10km radius
-        const lngDelta = 10 / (111 * Math.max(Math.cos((userLocation.lat * Math.PI) / 180), 0.1));
-
-        const { data: bboxData, error: bboxError } = await supabase
-          .from("restaurants")
-          .select("*")
-          .not("latitude", "is", null)
-          .not("longitude", "is", null)
-          .gte("latitude", userLocation.lat - latDelta)
-          .lte("latitude", userLocation.lat + latDelta)
-          .gte("longitude", userLocation.lng - lngDelta)
-          .lte("longitude", userLocation.lng + lngDelta);
-
-        if (bboxError) {
-          console.error("Bounding box query error:", bboxError);
-        }
-
-        // Merge and deduplicate results (same logic as NearbyRestaurants)
-        const merged = new Map<string, any>();
-        
-        nearbyData.forEach((restaurant) => {
-          const key = String(restaurant.id);
-          merged.set(key, {
-            ...restaurant,
-            rating: restaurant.rating ?? null,
-            place_id: restaurant.google_place_id || restaurant.id,
-            source: 'database'
-          });
-        });
-
-        if (bboxData) {
-          bboxData.forEach((restaurant: any) => {
-            const key = String(restaurant.id);
-            const coords = normalizeRestaurantCoordinates(restaurant, userLocation);
-            const latValue = coords.latitude ?? Number(restaurant.latitude ?? 0);
-            const lngValue = coords.longitude ?? Number(restaurant.longitude ?? 0);
-
-            if (!Number.isFinite(latValue) || !Number.isFinite(lngValue)) {
-              return;
-            }
-
-            const distanceKm = calculateDistance(
+          let nearbyData: NearbyRestaurant[] = [];
+          try {
+            nearbyData = await fetchNearbyRestaurants(
               userLocation.lat,
               userLocation.lng,
-              latValue,
-              lngValue
+              SEARCH_RADIUS_METERS,
+              RPC_FETCH_LIMIT,
+              undefined // No cuisine filter
             );
+          } catch (rpcError) {
+            console.warn("RPC fetch failed, fetching all restaurants directly:", rpcError);
+            // Fallback: fetch all restaurants directly
+            const { data: allRestaurants } = await supabase
+              .from('restaurants')
+              .select('id, name, address, latitude, longitude, cuisines, is_featured')
+              .not('latitude', 'is', null)
+              .not('longitude', 'is', null)
+              .limit(500);
 
-            const existing = merged.get(key);
-            if (!existing || distanceKm * 1000 < existing.distance_meters) {
-              merged.set(key, {
-                ...restaurant,
-                latitude: latValue,
-                longitude: lngValue,
-                cuisines: normalizeCuisines(restaurant.cuisines),
-                distance_meters: distanceKm * 1000,
-                rating: null, // Will be enriched later
-                place_id: restaurant.google_place_id || restaurant.id,
-                source: 'database'
+            if (allRestaurants && allRestaurants.length > 0) {
+              nearbyData = allRestaurants.map((restaurant) => {
+                const coords = normalizeRestaurantCoordinates(restaurant, userLocation);
+                const lat = coords.latitude ?? Number(restaurant.latitude) ?? 0;
+                const lng = coords.longitude ?? Number(restaurant.longitude) ?? 0;
+                
+                const distanceKm = calculateDistance(
+                  userLocation.lat,
+                  userLocation.lng,
+                  lat,
+                  lng
+                );
+
+                return {
+                  id: restaurant.id,
+                  name: restaurant.name,
+                  address: restaurant.address || '',
+                  latitude: lat,
+                  longitude: lng,
+                  cuisines: restaurant.cuisines,
+                  is_featured: restaurant.is_featured || false,
+                  distance_meters: distanceKm * 1000,
+                  price_level: null,
+                } as NearbyRestaurant;
               });
             }
-          });
-        }
+          }
 
-        const restaurantsList = Array.from(merged.values());
+          const restaurantsList = Array.from(nearbyData);
 
-        // Enrich with ratings (same as search logic)
-        if (restaurantsList.length > 0) {
-          const restaurantIds = restaurantsList.map((r: any) => String(r.id));
-          const { data: reviewsData } = await supabase
-            .from('reviews')
-            .select('restaurant_id, rating')
-            .in('restaurant_id', restaurantIds)
-            .not('rating', 'is', null);
+          // Enrich with ratings
+          if (restaurantsList.length > 0) {
+            const restaurantIds = restaurantsList.map((r: any) => String(r.id));
+            const { data: reviewsData } = await supabase
+              .from('reviews')
+              .select('restaurant_id, rating')
+              .in('restaurant_id', restaurantIds as any);
 
-          const restaurantsWithRating = restaurantsList.map((restaurant: any) => {
-            let avgRating = null;
-            if (reviewsData) {
-              const restaurantReviews = reviewsData.filter((review: any) => 
-                String(review.restaurant_id) === String(restaurant.id) && 
-                review.rating && 
-                review.rating >= 0.5
-              );
-              if (restaurantReviews.length > 0) {
-                const sum = restaurantReviews.reduce((acc: number, review: any) => acc + review.rating, 0);
-                avgRating = sum / restaurantReviews.length;
+            const restaurantsWithRating = restaurantsList.map((restaurant: any) => {
+              let avgRating = null;
+              if (reviewsData) {
+                const restaurantReviews = reviewsData.filter((review: any) => 
+                  String(review.restaurant_id) === String(restaurant.id) && 
+                  review.rating && 
+                  review.rating >= 0.5
+                );
+                if (restaurantReviews.length > 0) {
+                  const sum = restaurantReviews.reduce((acc: number, review: any) => acc + review.rating, 0);
+                  avgRating = sum / restaurantReviews.length;
+                }
               }
-            }
+              
+              return {
+                ...restaurant,
+                rating: avgRating || null,
+                cuisines: normalizeCuisines(restaurant.cuisines),
+                place_id: restaurant.google_place_id || restaurant.id,
+                source: 'database'
+              };
+            });
+
+            setRestaurants(restaurantsWithRating);
+            console.log(`Loaded ${restaurantsWithRating.length} nearby restaurants`);
+          }
+        } else {
+          // No location - fetch popular restaurants
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+          // Get reviews from the last 30 days for monthly visits
+          const { data: monthlyReviews } = await supabase
+            .from('reviews')
+            .select('id, rating, created_at, restaurant_id')
+            .eq('is_hidden', false)
+            .gte('created_at', thirtyDaysAgo.toISOString());
+
+          if (!monthlyReviews || monthlyReviews.length === 0) {
+            setRestaurants([]);
+            return;
+          }
+
+          // Get all reviews for ratings (all time)
+          const { data: allReviews } = await supabase
+            .from('reviews')
+            .select('rating, restaurant_id')
+            .eq('is_hidden', false);
+
+          // Get unique restaurant IDs from monthly reviews
+          const restaurantIds = [...new Set(monthlyReviews.map(r => String(r.restaurant_id)))];
+
+          // Fetch restaurant data
+          const { data: restaurantsData } = await supabase
+            .from('restaurants')
+            .select('id, name, address, cuisines')
+            .in('id', restaurantIds as any);
+
+          // Calculate ratings and visit counts
+          const restaurantMap = new Map();
+          
+          monthlyReviews.forEach(review => {
+            const count = restaurantMap.get(review.restaurant_id) || 0;
+            restaurantMap.set(review.restaurant_id, count + 1);
+          });
+
+          const restaurantsWithStats = restaurantsData?.map(restaurant => {
+            const monthlyVisits = restaurantMap.get(restaurant.id) || 0;
             
+            // Calculate all-time average rating - only count ratings >= 0.5
+            const restaurantReviews = allReviews?.filter(r => r.restaurant_id === restaurant.id && r.rating && r.rating >= 0.5);
+            let avgRating = null;
+            if (restaurantReviews && restaurantReviews.length > 0) {
+              const sum = restaurantReviews.reduce((acc, r) => acc + r.rating, 0);
+              avgRating = sum / restaurantReviews.length;
+            }
+
             return {
               ...restaurant,
-              rating: avgRating || restaurant.rating || null
+              monthlyVisits,
+              rating: avgRating,
+              visitCount: monthlyVisits,
+              cuisines: normalizeCuisines(restaurant.cuisines),
+              place_id: (restaurant as any).google_place_id || restaurant.id,
+              source: 'database'
             };
-          });
+          }) || [];
 
-          setRestaurants(restaurantsWithRating);
-          console.log(`Loaded ${restaurantsWithRating.length} nearby restaurants`);
+          // Sort by monthly visits, then overall rating, then name
+          const sorted = restaurantsWithStats
+            .sort((a, b) => {
+              if (b.monthlyVisits !== a.monthlyVisits) {
+                return b.monthlyVisits - a.monthlyVisits;
+              }
+              if (a.rating !== b.rating) {
+                if (a.rating === null) return 1;
+                if (b.rating === null) return -1;
+                return b.rating - a.rating;
+              }
+              return a.name.localeCompare(b.name);
+            });
+
+          setRestaurants(sorted);
+          console.log(`Loaded ${sorted.length} popular restaurants`);
         }
       } catch (error) {
-        console.error('Error loading nearby restaurants:', error);
+        console.error('Error loading restaurants:', error);
       }
     };
 
-    fetchNearbyRestaurantsList();
-  }, [userLocation, searchQuery]);
+    fetchRestaurantsList();
+  }, [userLocation, searchQuery, locationChecked]);
 
   // Apply filters to restaurants
   const applyFilters = async (restaurantList: any[]) => {
@@ -372,51 +439,8 @@ const Search = () => {
       }
     }
 
-    // Sort restaurants - when no search query, use same logic as nearby restaurants
+    // Sort restaurants - use filter sortBy for both search results and default view
     filtered.sort((a, b) => {
-      // When there's no search query, use nearby restaurants sorting
-      if (!searchQuery.trim()) {
-        if (userLocation) {
-          // With location: distance -> rating -> name
-          const getDistanceMeters = (restaurant: any) => {
-            if (restaurant.distance_meters != null) {
-              return restaurant.distance_meters;
-            }
-            if (restaurant.latitude && restaurant.longitude) {
-              return calculateDistance(
-                userLocation.lat,
-                userLocation.lng,
-                Number(restaurant.latitude),
-                Number(restaurant.longitude)
-              ) * 1000;
-            }
-            return Infinity;
-          };
-          
-          const distA = getDistanceMeters(a);
-          const distB = getDistanceMeters(b);
-          
-          if (distA !== distB) return distA - distB;
-          
-          // Then by rating
-          const ratingA = a.rating ?? -1;
-          const ratingB = b.rating ?? -1;
-          if (ratingA !== ratingB) return ratingB - ratingA;
-          
-          // Then by name
-          return (a.name || '').localeCompare(b.name || '');
-        } else {
-          // Without location: rating/accuracy -> name
-          const ratingA = a.rating ?? -1;
-          const ratingB = b.rating ?? -1;
-          if (ratingA !== ratingB) return ratingB - ratingA;
-          
-          // Then by name
-          return (a.name || '').localeCompare(b.name || '');
-        }
-      }
-      
-      // When there's a search query, use filter sortBy
       switch (filters.sortBy) {
         case 'distance': {
           // Distance sorting requires userLocation and coordinates
@@ -483,6 +507,22 @@ const Search = () => {
         }
         case 'name':
           return a.name.localeCompare(b.name);
+        case 'popularity': {
+          // Sort by visitCount (popularity), then rating, then name
+          const visitCountA = (a.visitCount || a.monthlyVisits || 0);
+          const visitCountB = (b.visitCount || b.monthlyVisits || 0);
+          if (visitCountA !== visitCountB) {
+            return visitCountB - visitCountA;
+          }
+          // Then by rating
+          const ratingA = a.rating ?? -1;
+          const ratingB = b.rating ?? -1;
+          if (ratingA !== ratingB) {
+            return ratingB - ratingA;
+          }
+          // Then by name
+          return a.name.localeCompare(b.name);
+        }
         case 'price': {
           /* Sort by price: cheapest first, but expensive before missing price
            * Order: 1 (cheap) -> 2 -> 3 -> 4 -> 5 (luxury) -> null (no price data)
@@ -691,26 +731,6 @@ const Search = () => {
         </div>
 
         <div className="p-4 space-y-6">
-        {!locationChecked ? (
-          <Card className="restaurant-card">
-            <CardContent className="p-4">
-              <div className="animate-pulse">
-                <div className="h-4 bg-muted rounded mb-2 w-3/4"></div>
-                <div className="h-3 bg-muted rounded mb-2 w-1/2"></div>
-                <div className="h-3 bg-muted rounded w-1/3"></div>
-              </div>
-            </CardContent>
-          </Card>
-        ) : !userLocation ? (
-          <Card className="restaurant-card">
-            <CardContent className="p-8 text-center">
-              <MapPin className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="font-medium text-lg mb-2">Location unavailable</h3>
-              <p className="text-muted-foreground">Turn on location to search restaurants</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <>
         {/* Search Bar */}
         <Card className="restaurant-card">
           <CardContent className="p-4">
@@ -856,9 +876,7 @@ const Search = () => {
               })
             )}
           </div>
-        </div>
-        </>
-        )}
+          </div>
         </div>
       </div>
 

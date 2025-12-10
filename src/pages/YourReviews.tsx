@@ -8,7 +8,6 @@ import HeaderBanner from "@/components/HeaderBanner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import ReviewCard from "@/components/ReviewCard";
-import RestaurantFilterButton, { RestaurantFilterOptions } from "@/components/RestaurantFilterButton";
 
 const YourReviews = () => {
   const navigate = useNavigate();
@@ -21,47 +20,6 @@ const YourReviews = () => {
   
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
-  const [allCuisines, setAllCuisines] = useState<any[]>([]);
-  const [filters, setFilters] = useState<RestaurantFilterOptions>({
-    sortBy: 'recently-visited',
-    cuisines: 'Any',
-    ratingRange: [0, 5],
-    distance: undefined
-  });
-
-  /* Fetch cuisines for filtering */
-  useEffect(() => {
-    const fetchCuisines = async () => {
-      const { data: cuisines } = await supabase
-        .from('cuisines')
-        .select('*')
-        .eq('is_active', true);
-      
-      if (cuisines) {
-        setAllCuisines(cuisines);
-      }
-    };
-    
-    fetchCuisines();
-  }, []);
-
-  /* Get user location for distance filtering */
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setUserLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-        },
-        (error) => {
-          console.log('Location access denied or failed:', error);
-        }
-      );
-    }
-  }, []);
 
   useEffect(() => {
     const fetchUserReviews = async () => {
@@ -132,105 +90,12 @@ const YourReviews = () => {
     fetchUserReviews();
   }, [profileUserId]);
 
-  /* Helper function to calculate distance */
-  const calculateDistance = (point1: {lat: number, lng: number}, point2: {lat: number, lng: number}) => {
-    const R = 6371; // Earth's radius in kilometers
-    const dLat = (point2.lat - point1.lat) * Math.PI / 180;
-    const dLng = (point2.lng - point1.lng) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(point1.lat * Math.PI / 180) * Math.cos(point2.lat * Math.PI / 180) *
-              Math.sin(dLng/2) * Math.sin(dLng/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-  };
-
-  /* Filter and sort reviews */
-  const filteredReviews = useMemo(() => {
-    let filtered = [...reviews];
-
-    /* Filter by cuisine (hierarchical) */
-    if (filters.cuisines !== 'Any') {
-      const selectedCuisine = filters.cuisines.trim();
-      const matchingCuisineNames = new Set<string>();
-      
-      allCuisines.forEach(cuisine => {
-        if (cuisine.name === selectedCuisine) {
-          matchingCuisineNames.add(cuisine.name);
-        } else {
-          for (let i = 1; i <= 5; i++) {
-            if (cuisine[`cuisine_category_${i}`] === selectedCuisine) {
-              matchingCuisineNames.add(cuisine.name);
-              break;
-            }
-          }
-        }
-      });
-      
-      filtered = filtered.filter(review => {
-        const restaurant = review.restaurant;
-        if (!restaurant?.cuisines || !Array.isArray(restaurant.cuisines) || restaurant.cuisines.length === 0) {
-          return false;
-        }
-        return restaurant.cuisines.some((cuisine: string) => matchingCuisineNames.has(cuisine));
-      });
-    }
-
-    /* Filter by rating range */
-    filtered = filtered.filter(review => {
-      if (!review.rating || review.rating === 0) {
-        return filters.ratingRange[0] === 0;
-      }
-      return review.rating >= filters.ratingRange[0] && review.rating <= filters.ratingRange[1];
+  // Sort reviews by most recently visited (default)
+  const sortedReviews = useMemo(() => {
+    return [...reviews].sort((a, b) => {
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
-
-    /* Filter by distance */
-    if (filters.distance && userLocation) {
-      filtered = filtered.filter(review => {
-        const restaurant = review.restaurant;
-        if (!restaurant?.latitude || !restaurant?.longitude) return false;
-        
-        const distance = calculateDistance(userLocation, {
-          lat: Number(restaurant.latitude),
-          lng: Number(restaurant.longitude)
-        });
-        return distance <= filters.distance!;
-      });
-    }
-
-    /* Sort reviews */
-    filtered.sort((a, b) => {
-      switch (filters.sortBy) {
-        case 'recently-visited':
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        case 'rating':
-          const ratingA = a.rating || 0;
-          const ratingB = b.rating || 0;
-          if (ratingA !== ratingB) {
-            return ratingB - ratingA;
-          }
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        case 'name':
-          return (a.restaurant?.name || '').localeCompare(b.restaurant?.name || '');
-        case 'distance':
-          if (userLocation && a.restaurant?.latitude && b.restaurant?.latitude) {
-            const distA = calculateDistance(userLocation, {
-              lat: Number(a.restaurant.latitude),
-              lng: Number(a.restaurant.longitude)
-            });
-            const distB = calculateDistance(userLocation, {
-              lat: Number(b.restaurant.latitude),
-              lng: Number(b.restaurant.longitude)
-            });
-            return distA - distB;
-          }
-          return 0;
-        default:
-          return 0;
-      }
-    });
-
-    return filtered;
-  }, [reviews, filters, allCuisines, userLocation]);
+  }, [reviews]);
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -249,22 +114,7 @@ const YourReviews = () => {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-2xl font-medium">Reviews</h1>
-          {reviews.length > 0 ? (
-            <RestaurantFilterButton
-              filters={filters}
-              onFiltersChange={setFilters}
-              hasLocation={!!userLocation}
-              userLocation={userLocation ? { latitude: userLocation.lat, longitude: userLocation.lng } : undefined}
-              customSortOptions={[
-                { value: 'recently-visited', label: 'Recently Visited' },
-                { value: 'rating', label: 'Rating' },
-                { value: 'name', label: 'Name' },
-                { value: 'distance', label: 'Distance' }
-              ]}
-            />
-          ) : (
-            <div className="w-10 h-10" />
-          )}
+          <div className="w-10 h-10" />
         </div>
       </div>
 
@@ -283,8 +133,8 @@ const YourReviews = () => {
                 </CardContent>
               </Card>
             ))
-          ) : filteredReviews.length > 0 ? (
-            filteredReviews.map((review) => {
+          ) : sortedReviews.length > 0 ? (
+            sortedReviews.map((review) => {
               const formatDate = (dateString: string) => {
                 const date = new Date(dateString);
                 return date.toISOString().split('T')[0]; // YYYY-MM-DD format

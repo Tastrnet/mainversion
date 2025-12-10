@@ -641,21 +641,7 @@ const ListDetail = () => {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <h1 className="text-2xl font-medium">List</h1>
-            {unfilteredRestaurantsCount > 0 ? (
-              <RestaurantFilterButton
-                filters={filters}
-                onFiltersChange={setFilters}
-                hasLocation={!!userLocation}
-                hideRatingFilter={true}
-                customSortOptions={[
-                  { value: 'list_order' as const, label: 'List order' },
-                  ...(userLocation ? [{ value: 'distance' as const, label: 'Distance' }] : [])
-                ]}
-                availableCuisines={availableCuisines}
-              />
-            ) : (
-              <div className="w-10 h-10" />
-            )}
+            <div className="w-10 h-10" />
           </div>
         </div>
 
@@ -808,13 +794,6 @@ const ListDetail = () => {
                         )}
                       </div>
                     </div>
-                    
-                    {restaurant.rating && (
-                      <div className="flex items-center ml-2 flex-shrink-0">
-                        <Star className="h-4 w-4 text-orange-500 mr-1 fill-current" />
-                        <span className="text-sm text-muted-foreground">{restaurant.rating}</span>
-                      </div>
-                    )}
                   </div>
                 </div>
               </CardContent>

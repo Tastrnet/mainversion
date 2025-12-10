@@ -14,9 +14,9 @@ import { calculateDistance } from "@/lib/search-utils";
 // Nearby restaurants carousel component
 const NearbyRestaurantsCarousel = () => {
   const navigate = useNavigate();
-  const MAX_DISTANCE_KM = 10;
   const MAX_RESULTS = 10;
-  const SEARCH_RADIUS_METERS = MAX_DISTANCE_KM * 1000;
+  // No distance limit - fetch all restaurants and show closest ones
+  const SEARCH_RADIUS_METERS = 20000000; // 20,000 km - effectively no limit
 
   type NearbyCarouselRestaurant = NearbyRestaurant & { rating: string | null };
 
@@ -55,13 +55,60 @@ const NearbyRestaurantsCarousel = () => {
       }
 
       try {
-        const baseResults = await fetchNearbyRestaurants(
-          userLocation.lat,
-          userLocation.lng,
-          SEARCH_RADIUS_METERS,
-          MAX_RESULTS * 2
-        );
+        // Fetch all restaurants (no distance limit) - database has less than 500 restaurants
+        let baseResults: NearbyRestaurant[] = [];
+        
+        try {
+          baseResults = await fetchNearbyRestaurants(
+            userLocation.lat,
+            userLocation.lng,
+            SEARCH_RADIUS_METERS,
+            500 // Fetch up to 500 restaurants (more than database has)
+          );
+        } catch (rpcError) {
+          console.warn('RPC fetch failed, fetching all restaurants directly:', rpcError);
+          // Fallback: fetch all restaurants directly and calculate distance
+          const { data: allRestaurants, error } = await supabase
+            .from('restaurants')
+            .select('id, name, address, latitude, longitude, cuisines, is_featured')
+            .not('latitude', 'is', null)
+            .not('longitude', 'is', null)
+            .limit(500);
 
+          if (error) {
+            console.error('Error fetching all restaurants:', error);
+            throw error;
+          }
+
+          if (allRestaurants && allRestaurants.length > 0) {
+            baseResults = allRestaurants.map((restaurant) => {
+              const coords = normalizeRestaurantCoordinates(restaurant, userLocation);
+              const lat = coords.latitude ?? Number(restaurant.latitude) ?? 0;
+              const lng = coords.longitude ?? Number(restaurant.longitude) ?? 0;
+              
+              const distanceKm = calculateDistance(
+                userLocation.lat,
+                userLocation.lng,
+                lat,
+                lng
+              );
+
+              return {
+                id: restaurant.id,
+                name: restaurant.name,
+                address: restaurant.address || '',
+                latitude: lat,
+                longitude: lng,
+                cuisines: restaurant.cuisines,
+                is_featured: restaurant.is_featured || false,
+                distance_meters: distanceKm * 1000,
+                price_level: null,
+              } as NearbyRestaurant;
+            });
+          }
+        }
+
+        // Sort by distance (closest first) - no distance filtering
         const sorted = baseResults
           .filter((restaurant) => typeof restaurant.distance_meters === "number")
           .sort(
@@ -70,6 +117,7 @@ const NearbyRestaurantsCarousel = () => {
               (b.distance_meters ?? Number.POSITIVE_INFINITY)
           );
 
+        // Get the closest restaurants
         const topResults = sorted.slice(0, MAX_RESULTS);
 
         const withRatings = await Promise.all(
@@ -77,7 +125,7 @@ const NearbyRestaurantsCarousel = () => {
             const { data: reviewsData } = await supabase
               .from("reviews")
               .select("rating")
-              .eq("restaurant_id", restaurant.id)
+              .eq("restaurant_id", restaurant.id as any)
               .gte("rating", 0.5);
 
             let averageRating: string | null = null;

@@ -41,6 +41,7 @@ interface RestaurantFilterButtonProps {
   showTimePeriod?: boolean;
   customSortOptions?: Array<{ value: RestaurantFilterOptions['sortBy']; label: string }>;
   hideRatingFilter?: boolean;
+  hideCuisineFilter?: boolean;
   userLocation?: { latitude: number; longitude: number };
   defaultDistance?: number; // Default distance for this specific page
   enableSortOptions?: boolean;
@@ -62,6 +63,7 @@ const RestaurantFilterButton = ({
   showTimePeriod = false,
   customSortOptions,
   hideRatingFilter = false,
+  hideCuisineFilter = false,
   userLocation,
   defaultDistance,
   enableSortOptions = true,
@@ -225,8 +227,8 @@ const RestaurantFilterButton = ({
     : false;
 
   const sortFilterActive = enableSortOptions && filters.sortBy !== defaultSortBy;
-  const cuisineFilterActive = Boolean(filters.cuisines && filters.cuisines !== 'Any');
-  const ratingFilterActive = filters.ratingRange[0] !== 0 || filters.ratingRange[1] !== 5;
+  const cuisineFilterActive = !hideCuisineFilter && Boolean(filters.cuisines && filters.cuisines !== 'Any');
+  const ratingFilterActive = !hideRatingFilter && (filters.ratingRange[0] !== 0 || filters.ratingRange[1] !== 5);
   const distanceFilterActive = enableDistanceFilter && isDistanceActive;
   const timeFilterActive = showTimePeriod && filters.timePeriod !== defaultTimePeriod;
 
@@ -309,30 +311,32 @@ const RestaurantFilterButton = ({
           )}
 
           {/* Cuisine Section */}
-          <div>
-            <button
-              onClick={() => toggleSection('cuisines')}
-              className="w-full flex items-center justify-between p-2 rounded-lg text-sm hover:bg-muted text-left"
-            >
-              <div>
-                <span className="font-medium text-sm">Cuisine: </span>
-                <span>{getCurrentCuisineLabel()}</span>
-              </div>
-              {expandedSections.cuisines ? 
-                <ChevronDown className="h-4 w-4 text-muted-foreground" /> : 
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              }
-            </button>
-            {expandedSections.cuisines && (
-              <div className="mt-2">
-                <HierarchicalCuisineFilter 
-                  selectedCuisine={filters.cuisines}
-                  onCuisineSelect={(cuisineName) => updateFilter('cuisines', cuisineName)}
-                  availableCuisines={availableCuisines}
-                />
-              </div>
-            )}
-          </div>
+          {!hideCuisineFilter && (
+            <div>
+              <button
+                onClick={() => toggleSection('cuisines')}
+                className="w-full flex items-center justify-between p-2 rounded-lg text-sm hover:bg-muted text-left"
+              >
+                <div>
+                  <span className="font-medium text-sm">Cuisine: </span>
+                  <span>{getCurrentCuisineLabel()}</span>
+                </div>
+                {expandedSections.cuisines ? 
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" /> : 
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                }
+              </button>
+              {expandedSections.cuisines && (
+                <div className="mt-2">
+                  <HierarchicalCuisineFilter 
+                    selectedCuisine={filters.cuisines}
+                    onCuisineSelect={(cuisineName) => updateFilter('cuisines', cuisineName)}
+                    availableCuisines={availableCuisines}
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Rating Range Section */}
           {!hideRatingFilter && (
