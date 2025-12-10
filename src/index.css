@@ -1,0 +1,236 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* tastr Design System - Restaurant Review App
+Colors: White (#F9F6EE), Black (#383734), Orange (#FF6D13), Green (#3A5743)
+Font: DM Serif Display
+UI: Minimalist, rounded elements, mobile-first
+Updated: Ready for deployment
+*/
+
+@layer base {
+  :root {
+    /* tastr Color Palette */
+    --background: 32 21% 96%; /* #F9F6EE - Clean white */
+    --foreground: 32 14% 22%; /* #383734 - Deep black */
+
+    --card: 32 21% 96%;
+    --card-foreground: 32 14% 22%;
+
+    --popover: 32 21% 96%;
+    --popover-foreground: 32 14% 22%;
+
+    --primary: 20 100% 54%; /* #FF6D13 - Vibrant orange */
+    --primary-foreground: 32 21% 96%;
+
+    --secondary: 32 21% 94%;
+    --secondary-foreground: 32 14% 22%;
+
+    --accent: 141 31% 29%; /* #3A5743 - Forest green */
+    --accent-foreground: 32 21% 96%;
+
+    --muted: 32 21% 92%;
+    --muted-foreground: 32 14% 45%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 32 21% 96%;
+
+    --border: 32 21% 88%;
+    --input: 32 21% 88%;
+    --ring: 20 100% 54%;
+
+    --radius: 0.75rem; /* More rounded for mobile */
+
+    /* Navigation & Sidebar */
+    --sidebar-background: 32 21% 96%;
+    --sidebar-foreground: 32 14% 22%;
+    --sidebar-primary: 20 100% 54%;
+    --sidebar-primary-foreground: 32 21% 96%;
+    --sidebar-accent: 32 21% 94%;
+    --sidebar-accent-foreground: 32 14% 22%;
+    --sidebar-border: 32 21% 88%;
+    --sidebar-ring: 20 100% 54%;
+
+    /* tastr Custom Properties */
+    --orange-glow: 20 100% 54%;
+    --green-accent: 141 31% 29%;
+    --surface-elevated: 32 21% 98%;
+    --text-subtle: 32 14% 60%;
+    
+    /* Animations & Transitions */
+    --animation-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --animation-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --animation-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Shadows & Effects */
+    --shadow-soft: 0 2px 8px hsl(var(--foreground) / 0.1);
+    --shadow-medium: 0 4px 16px hsl(var(--foreground) / 0.15);
+    --shadow-orange: 0 4px 20px hsl(var(--primary) / 0.25);
+  }
+
+  .dark {
+    /* Modern warm dark mode with subtle tints */
+    --background: 240 8% 8%; /* Deep blue-black */
+    --foreground: 32 20% 95%; /* Warm white */
+    
+    --card: 240 7% 11%; /* Elevated dark surface */
+    --card-foreground: 32 20% 95%;
+    
+    --popover: 240 8% 10%;
+    --popover-foreground: 32 20% 95%;
+    
+    --primary: 20 100% 60%; /* Brighter orange for dark mode */
+    --primary-foreground: 240 8% 8%;
+    
+    --secondary: 240 6% 16%; /* Warm gray surface */
+    --secondary-foreground: 32 20% 95%;
+    
+    --accent: 141 35% 38%; /* Brighter green for visibility */
+    --accent-foreground: 32 20% 95%;
+    
+    --muted: 240 5% 18%; /* Subtle surface */
+    --muted-foreground: 32 10% 65%; /* Warm muted text */
+    
+    --destructive: 0 75% 58%;
+    --destructive-foreground: 32 20% 95%;
+    
+    --border: 240 6% 20%; /* Subtle warm border */
+    --input: 240 6% 18%;
+    --ring: 20 100% 60%;
+    
+    /* Dark mode sidebar */
+    --sidebar-background: 240 7% 11%;
+    --sidebar-foreground: 32 20% 95%;
+    --sidebar-primary: 20 100% 60%;
+    --sidebar-primary-foreground: 240 8% 8%;
+    --sidebar-accent: 240 6% 16%;
+    --sidebar-accent-foreground: 32 20% 95%;
+    --sidebar-border: 240 6% 20%;
+    --sidebar-ring: 20 100% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-serif;
+    font-family: 'DM Serif Display', serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Mobile-first responsive typography */
+  h1 {
+    @apply text-3xl font-normal tracking-tight;
+  }
+  
+  h2 {
+    @apply text-2xl font-normal tracking-tight;
+  }
+  
+  h3 {
+    @apply text-xl font-normal tracking-tight;
+  }
+  
+  p {
+    @apply text-base leading-relaxed;
+  }
+
+  /* Smooth animations */
+  * {
+    transition: color var(--animation-fast), background-color var(--animation-fast), border-color var(--animation-fast);
+  }
+}
+
+@layer components {
+  /* tastr Brand Elements */
+  .tastr-logo {
+    @apply text-primary font-normal tracking-tight;
+    font-family: 'DM Serif Display', serif;
+  }
+  
+  /* Card Styles */
+  .restaurant-card {
+    @apply bg-card border border-border rounded-2xl overflow-hidden shadow-sm;
+  }
+  
+  .review-card {
+    @apply bg-card border border-border rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300;
+  }
+  
+  /* Button Variants */
+  .btn-rounded {
+    @apply rounded-full px-6 py-2.5 font-medium transition-all duration-300;
+  }
+  
+  .btn-primary {
+    @apply btn-rounded bg-primary text-primary-foreground shadow-sm;
+  }
+  
+  .btn-secondary {
+    @apply btn-rounded bg-secondary text-secondary-foreground hover:bg-secondary/80 border border-border;
+  }
+
+  /* Mobile Navigation */
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border;
+  }
+  
+  /* Fade Animation */
+  .fade-in {
+    animation: fadeIn var(--animation-slow) ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Calendar customization - clean single color */
+  .rdp-day_today {
+    background-color: transparent !important;
+    color: hsl(var(--foreground)) !important;
+    font-weight: normal !important;
+  }
+  
+  .rdp-day_disabled {
+    opacity: 0.3 !important;
+    color: hsl(var(--muted-foreground)) !important;
+    cursor: not-allowed !important;
+  }
+  
+  .rdp-day:hover:not(.rdp-day_selected):not(.rdp-day_disabled) {
+    background-color: hsl(var(--muted)) !important;
+  }
+
+  /* Mobile safe area support for devices with dynamic island/notch */
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .safe-area-content {
+    padding-top: calc(4rem + env(safe-area-inset-top));
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
