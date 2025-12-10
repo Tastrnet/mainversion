@@ -1,0 +1,39 @@
+name: Update Restaurants
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # varje söndag kl 00:00
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Klona repo
+        uses: actions/checkout@v3
+
+      - name: Installera Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Installera beroenden
+        run: npm install
+
+      - name: Hämta restauranger
+        run: npm run fetch
+
+      - name: Ladda upp till Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: npm run upload
+
+      - name: Commit & pusha JSON
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add restaurants.json
+          git commit -m "Uppdaterade restauranger automatiskt" || echo "Inga ändringar"
+          git push

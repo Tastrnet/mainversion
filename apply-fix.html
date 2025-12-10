@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apply Nearby Restaurants Fix</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .instructions {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            line-height: 2;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        
+        .instructions code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        .sql-box {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.2s;
+        }
+        
+        .copy-btn:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+        
+        .copy-btn:active {
+            transform: translateY(0);
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .link:hover {
+            text-decoration: underline;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Fix Nearby Restaurants Function</h1>
+        <p class="subtitle">This will remove the google_place_id dependency from the database function</p>
+        
+        <div class="warning">
+            ⚠️ <strong>Important:</strong> You need to run this SQL in your Supabase Dashboard SQL Editor. This page provides the SQL for you to copy.
+        </div>
+        
+        <div class="instructions">
+            <strong>Steps to apply the fix:</strong>
+            <ol>
+                <li>Open your <a href="https://supabase.com/dashboard/project/pgcfvoyajemtcyaxpefg/sql/new" target="_blank" class="link">Supabase SQL Editor</a></li>
+                <li>Copy the SQL below (click the copy button)</li>
+                <li>Paste it into the SQL Editor</li>
+                <li>Click <strong>"Run"</strong> to execute</li>
+                <li>Wait for the success message</li>
+            </ol>
+        </div>
+        
+        <div class="sql-box" id="sqlContent">DROP FUNCTION IF EXISTS get_nearby_restaurants(float, float, int, int);
+
+CREATE OR REPLACE FUNCTION get_nearby_restaurants(
+  lat float,
+  lng float,
+  radius int DEFAULT 5000,
+  limit_count int DEFAULT 20
+)
+RETURNS TABLE(
+  id int,
+  name text,
+  address text,
+  latitude numeric,
+  longitude numeric,
+  cuisines jsonb,
+  is_featured boolean,
+  distance_meters float
+) 
+LANGUAGE plpgsql
+STABLE
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    r.id,
+    r.name,
+    r.address,
+    r.latitude,
+    r.longitude,
+    r.cuisines,
+    r.is_featured,
+    ST_Distance(
+      r.geom::geography,
+      ST_SetSRID(ST_Point(lng, lat), 4326)::geography
+    ) AS distance_meters
+  FROM restaurants r
+  WHERE r.geom IS NOT NULL
+    AND ST_DWithin(
+      r.geom::geography,
+      ST_SetSRID(ST_Point(lng, lat), 4326)::geography,
+      radius
+    )
+  ORDER BY r.geom &lt;-&gt; ST_SetSRID(ST_Point(lng, lat), 4326)
+  LIMIT limit_count;
+END;
+$$;</div>
+        
+        <button class="copy-btn" onclick="copySQL()">📋 Copy SQL</button>
+        <div class="success" id="successMsg">✅ SQL copied to clipboard!</div>
+        
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #dee2e6;">
+            <h3 style="font-size: 16px; margin-bottom: 10px;">Quick Link:</h3>
+            <a href="https://supabase.com/dashboard/project/pgcfvoyajemtcyaxpefg/sql/new" target="_blank" class="link">
+                → Open Supabase SQL Editor
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        function copySQL() {
+            const sql = `DROP FUNCTION IF EXISTS get_nearby_restaurants(float, float, int, int);
+
+CREATE OR REPLACE FUNCTION get_nearby_restaurants(
+  lat float,
+  lng float,
+  radius int DEFAULT 5000,
+  limit_count int DEFAULT 20
+)
+RETURNS TABLE(
+  id int,
+  name text,
+  address text,
+  latitude numeric,
+  longitude numeric,
+  cuisines jsonb,
+  is_featured boolean,
+  distance_meters float
+) 
+LANGUAGE plpgsql
+STABLE
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT 
+    r.id,
+    r.name,
+    r.address,
+    r.latitude,
+    r.longitude,
+    r.cuisines,
+    r.is_featured,
+    ST_Distance(
+      r.geom::geography,
+      ST_SetSRID(ST_Point(lng, lat), 4326)::geography
+    ) AS distance_meters
+  FROM restaurants r
+  WHERE r.geom IS NOT NULL
+    AND ST_DWithin(
+      r.geom::geography,
+      ST_SetSRID(ST_Point(lng, lat), 4326)::geography,
+      radius
+    )
+  ORDER BY r.geom <-> ST_SetSRID(ST_Point(lng, lat), 4326)
+  LIMIT limit_count;
+END;
+$$;`;
+            
+            navigator.clipboard.writeText(sql).then(() => {
+                const success = document.getElementById('successMsg');
+                success.style.display = 'block';
+                setTimeout(() => {
+                    success.style.display = 'none';
+                }, 3000);
+            });
+        }
+    </script>
+</body>
+</html>
+
+
+
