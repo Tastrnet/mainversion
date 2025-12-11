@@ -1,0 +1,205 @@
+
+Showing Recent Issues
+
+Prepare build
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules/Cordova-28BVT1Y5KS76FT7GWVNFF6PQT.pcm
+
+<module-includes>:1:9: note: in file included from <module-includes>:1:
+1 | #import "Headers/CapacitorCordova.h"
+  |         `- note: in file included from <module-includes>:1:
+2 | 
+
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/CapacitorCordova.h:10:9: note: in file included from /Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/CapacitorCordova.h:10:
+ 8 | 
+ 9 | #import <Cordova/AppDelegate.h>
+10 | #import <Cordova/CDV.h>
+   |         `- note: in file included from /Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/CapacitorCordova.h:10:
+11 | #import <Cordova/CDVAvailability.h>
+12 | #import <Cordova/CDVCommandDelegate.h>
+
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDV.h:28:9: note: in file included from /Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDV.h:28:
+26 | #import "CDVURLProtocol.h"
+27 | #import "CDVScreenOrientationDelegate.h"
+28 | #import "CDVWebViewProcessPoolFactory.h"
+   |         `- note: in file included from /Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDV.h:28:
+29 | 
+
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDVWebViewProcessPoolFactory.h:23:31: warning: 'WKProcessPool' is deprecated: first deprecated in iOS 15.0 - Creating and using multiple instances of WKProcessPool no longer has any effect.
+21 | 
+22 | @interface CDVWebViewProcessPoolFactory : NSObject
+23 | @property (nonatomic, retain) WKProcessPool* sharedPool;
+   |                               `- warning: 'WKProcessPool' is deprecated: first deprecated in iOS 15.0 - Creating and using multiple instances of WKProcessPool no longer has any effect.
+24 | 
+25 | +(instancetype) sharedFactory;
+
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk/System/Library/Frameworks/WebKit.framework/Headers/WKProcessPool.h:38:12: note: 'WKProcessPool' has been explicitly marked deprecated here
+36 | WK_SWIFT_UI_ACTOR
+37 | WK_EXTERN API_DEPRECATED("Creating and using multiple instances of WKProcessPool no longer has any effect.", macos(10.10, 12.0), ios(8.0, 15.0), visionos(1.0, 1.0))
+38 | @interface WKProcessPool : NSObject <NSSecureCoding>
+   |            `- note: 'WKProcessPool' has been explicitly marked deprecated here
+39 | @end
+40 | 
+
+<module-includes>:1:9: note: in file included from <module-includes>:1:
+1 | #import "Headers/CapacitorCordova.h"
+  |         `- note: in file included from <module-includes>:1:
+2 | 
+
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/CapacitorCordova.h:10:9: note: in file included from /Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/CapacitorCordova.h:10:
+ 8 | 
+ 9 | #import <Cordova/AppDelegate.h>
+10 | #import <Cordova/CDV.h>
+   |         `- note: in file included from /Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/CapacitorCordova.h:10:
+11 | #import <Cordova/CDVAvailability.h>
+12 | #import <Cordova/CDVCommandDelegate.h>
+
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDV.h:28:9: note: in file included from /Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDV.h:28:
+26 | #import "CDVURLProtocol.h"
+27 | #import "CDVScreenOrientationDelegate.h"
+28 | #import "CDVWebViewProcessPoolFactory.h"
+   |         `- note: in file included from /Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDV.h:28:
+29 | 
+
+2 warnings generated.
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDVWebViewProcessPoolFactory.h:26:3: warning: 'WKProcessPool' is deprecated: first deprecated in iOS 15.0 - Creating and using multiple instances of WKProcessPool no longer has any effect.
+24 | 
+25 | +(instancetype) sharedFactory;
+26 | -(WKProcessPool*) sharedProcessPool;
+   |   `- warning: 'WKProcessPool' is deprecated: first deprecated in iOS 15.0 - Creating and using multiple instances of WKProcessPool no longer has any effect.
+27 | @end
+28 | 
+
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk/System/Library/Frameworks/WebKit.framework/Headers/WKProcessPool.h:38:12: note: 'WKProcessPool' has been explicitly marked deprecated here
+36 | WK_SWIFT_UI_ACTOR
+37 | WK_EXTERN API_DEPRECATED("Creating and using multiple instances of WKProcessPool no longer has any effect.", macos(10.10, 12.0), ios(8.0, 15.0), visionos(1.0, 1.0))
+38 | @interface WKProcessPool : NSObject <NSSecureCoding>
+   |            `- note: 'WKProcessPool' has been explicitly marked deprecated here
+39 | @end
+40 | 
+
+/Users/Felix/Downloads/mainversion-main/ios/App/Pods/<module-includes>:1:9: in file included from <module-includes>:1:
+
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/CapacitorCordova.h:10:9: in file included from /Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/CapacitorCordova.h:10:
+
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDV.h:28:9: in file included from /Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDV.h:28:
+
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDVWebViewProcessPoolFactory.h:23:31: 'WKProcessPool' is deprecated: first deprecated in iOS 15.0 - Creating and using multiple instances of WKProcessPool no longer has any effect.
+
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk/System/Library/Frameworks/WebKit.framework/Headers/WKProcessPool.h:38:12: 'WKProcessPool' has been explicitly marked deprecated here
+
+/Users/Felix/Downloads/mainversion-main/ios/App/Pods/<module-includes>:1:9: in file included from <module-includes>:1:
+
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/CapacitorCordova.h:10:9: in file included from /Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/CapacitorCordova.h:10:
+
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDV.h:28:9: in file included from /Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDV.h:28:
+
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDVWebViewProcessPoolFactory.h:26:3: 'WKProcessPool' is deprecated: first deprecated in iOS 15.0 - Creating and using multiple instances of WKProcessPool no longer has any effect.
+
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk/System/Library/Frameworks/WebKit.framework/Headers/WKProcessPool.h:38:12: 'WKProcessPool' has been explicitly marked deprecated here
+
+SwiftExplicitDependencyGeneratePcm arm64 /Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules/Cordova-4G7MZXCA6I3DVH13SFRDDMDUL.pcm
+
+<module-includes>:1:9: note: in file included from <module-includes>:1:
+1 | #import "Headers/CapacitorCordova.h"
+  |         `- note: in file included from <module-includes>:1:
+2 | 
+
+/Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CapacitorCordova.h:10:9: note: in file included from /Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CapacitorCordova.h:10:
+ 8 | 
+ 9 | #import <Cordova/AppDelegate.h>
+10 | #import <Cordova/CDV.h>
+   |         `- note: in file included from /Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CapacitorCordova.h:10:
+11 | #import <Cordova/CDVAvailability.h>
+12 | #import <Cordova/CDVCommandDelegate.h>
+
+/Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CDV.h:28:9: note: in file included from /Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CDV.h:28:
+26 | #import "CDVURLProtocol.h"
+27 | #import "CDVScreenOrientationDelegate.h"
+28 | #import "CDVWebViewProcessPoolFactory.h"
+   |         `- note: in file included from /Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CDV.h:28:
+29 | 
+
+/Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CDVWebViewProcessPoolFactory.h:23:31: warning: 'WKProcessPool' is deprecated: first deprecated in iOS 15.0 - Creating and using multiple instances of WKProcessPool no longer has any effect.
+21 | 
+22 | @interface CDVWebViewProcessPoolFactory : NSObject
+23 | @property (nonatomic, retain) WKProcessPool* sharedPool;
+   |                               `- warning: 'WKProcessPool' is deprecated: first deprecated in iOS 15.0 - Creating and using multiple instances of WKProcessPool no longer has any effect.
+24 | 
+25 | +(instancetype) sharedFactory;
+
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk/System/Library/Frameworks/WebKit.framework/Headers/WKProcessPool.h:38:12: note: 'WKProcessPool' has been explicitly marked deprecated here
+36 | WK_SWIFT_UI_ACTOR
+37 | WK_EXTERN API_DEPRECATED("Creating and using multiple instances of WKProcessPool no longer has any effect.", macos(10.10, 12.0), ios(8.0, 15.0), visionos(1.0, 1.0))
+38 | @interface WKProcessPool : NSObject <NSSecureCoding>
+   |            `- note: 'WKProcessPool' has been explicitly marked deprecated here
+39 | @end
+40 | 
+
+<module-includes>:1:9: note: in file included from <module-includes>:1:
+1 | #import "Headers/CapacitorCordova.h"
+  |         `- note: in file included from <module-includes>:1:
+2 | 
+
+/Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CapacitorCordova.h:10:9: note: in file included from /Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CapacitorCordova.h:10:
+ 8 | 
+ 9 | #import <Cordova/AppDelegate.h>
+10 | #import <Cordova/CDV.h>
+   |         `- note: in file included from /Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CapacitorCordova.h:10:
+11 | #import <Cordova/CDVAvailability.h>
+12 | #import <Cordova/CDVCommandDelegate.h>
+
+/Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CDV.h:28:9: note: in file included from /Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CDV.h:28:
+26 | #import "CDVURLProtocol.h"
+27 | #import "CDVScreenOrientationDelegate.h"
+28 | #import "CDVWebViewProcessPoolFactory.h"
+   |         `- note: in file included from /Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CDV.h:28:
+29 | 
+
+2 warnings generated.
+/Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CDVWebViewProcessPoolFactory.h:26:3: warning: 'WKProcessPool' is deprecated: first deprecated in iOS 15.0 - Creating and using multiple instances of WKProcessPool no longer has any effect.
+24 | 
+25 | +(instancetype) sharedFactory;
+26 | -(WKProcessPool*) sharedProcessPool;
+   |   `- warning: 'WKProcessPool' is deprecated: first deprecated in iOS 15.0 - Creating and using multiple instances of WKProcessPool no longer has any effect.
+27 | @end
+28 | 
+
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk/System/Library/Frameworks/WebKit.framework/Headers/WKProcessPool.h:38:12: note: 'WKProcessPool' has been explicitly marked deprecated here
+36 | WK_SWIFT_UI_ACTOR
+37 | WK_EXTERN API_DEPRECATED("Creating and using multiple instances of WKProcessPool no longer has any effect.", macos(10.10, 12.0), ios(8.0, 15.0), visionos(1.0, 1.0))
+38 | @interface WKProcessPool : NSObject <NSSecureCoding>
+   |            `- note: 'WKProcessPool' has been explicitly marked deprecated here
+39 | @end
+40 | 
+
+/Users/Felix/Downloads/mainversion-main/ios/App/<module-includes>:1:9: in file included from <module-includes>:1:
+
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/CapacitorCordova.h:10:9: in file included from /Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CapacitorCordova.h:10:
+
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDV.h:28:9: in file included from /Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CDV.h:28:
+
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDVWebViewProcessPoolFactory.h:23:31: 'WKProcessPool' is deprecated: first deprecated in iOS 15.0 - Creating and using multiple instances of WKProcessPool no longer has any effect.
+
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk/System/Library/Frameworks/WebKit.framework/Headers/WKProcessPool.h:38:12: 'WKProcessPool' has been explicitly marked deprecated here
+
+/Users/Felix/Downloads/mainversion-main/ios/App/<module-includes>:1:9: in file included from <module-includes>:1:
+
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/CapacitorCordova.h:10:9: in file included from /Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CapacitorCordova.h:10:
+
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDV.h:28:9: in file included from /Users/Felix/Library/Developer/Xcode/DerivedData/App-cxswoecfmahhbygzcugedankgnya/Build/Products/Debug-iphonesimulator/CapacitorCordova/Cordova.framework/Headers/CDV.h:28:
+
+/Users/Felix/Downloads/mainversion-main/node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/Classes/Public/CDVWebViewProcessPoolFactory.h:26:3: 'WKProcessPool' is deprecated: first deprecated in iOS 15.0 - Creating and using multiple instances of WKProcessPool no longer has any effect.
+
+/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator26.1.sdk/System/Library/Frameworks/WebKit.framework/Headers/WKProcessPool.h:38:12: 'WKProcessPool' has been explicitly marked deprecated here
+
+
+Build target App of project App with configuration Debug
+warning: Run script build phase '[CP] Embed Pods Frameworks' will be run during every build because it does not specify any outputs. To address this issue, either add output dependencies to the script phase, or configure it to run in every build by unchecking "Based on dependency analysis" in the script phase. (in target 'App' from project 'App')
+
+
+Run script build phase '[CP] Embed Pods Frameworks' will be run during every build because it does not specify any outputs. To address this issue, either add output dependencies to the script phase, or configure it to run in every build by unchecking "Based on dependency analysis" in the script phase.
+
+
+
+Build succeeded    2025-12-11, 02:22    10.6 seconds

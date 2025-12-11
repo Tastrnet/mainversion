@@ -1,96 +1,74 @@
-# Fixes Applied for App Store Submission
+# Fixes Applied
 
-## ✅ Completed Fixes
+## ✅ 1. Orange Plus Button - Made Perfectly Round
 
-### 1. Capacitor Configuration (`capacitor.config.ts`)
-**Status:** ✅ FIXED
+**Problem:** The orange plus button in the bottom menu was not perfectly round.
 
-**Changes Made:**
-- Commented out development server URL (required for production)
-- Updated appId placeholder to `net.tastr.app` (you need to replace with your actual registered App ID)
-- Added TODO comment for App ID update
+**Solution:**
+- Replaced the Button component with a native `<button>` element for the center button
+- Added explicit `borderRadius: '50%'` via inline style to ensure perfect circle
+- Removed all padding (`p-0`) and margins (`m-0`)
+- Set fixed dimensions `h-12 w-12` with `aspect-square`
+- Added `border-0` to remove any default button borders
 
-**File:** `capacitor.config.ts`
+**File Modified:** `src/components/MobileNavigation.tsx`
 
-**What You Need to Do:**
-1. Register your App ID in Apple Developer Portal (if not already done)
-2. Update `appId` in `capacitor.config.ts` to match your registered App ID
-3. Run `npx cap sync ios` after updating
+## ✅ 2. WKProcessPool Deprecation Warnings - Suppressed
 
-### 2. iOS Setup Documentation
-**Status:** ✅ CREATED
+**Problem:** Warnings about `WKProcessPool` being deprecated in iOS 15.0 from CapacitorCordova library.
 
-**Created File:** `ios-setup-instructions.md`
+**Solution:**
+- Added compiler flags to Podfile's `post_install` hook
+- Suppresses deprecation warnings at the Pods level (where the warnings originate)
+- Added `-Wno-deprecated-declarations` to `OTHER_CFLAGS` for all Pods targets
+- Set `GCC_WARN_DEPRECATED_FUNCTIONS = 'NO'` for all Pods targets
 
-**Contains:**
-- Step-by-step instructions for iOS project setup
-- Location permission string configuration
-- App ID configuration steps
-- Signing & certificate setup
-- Build and submission process
+**File Modified:** `ios/App/Podfile`
 
-## ⚠️ Remaining Actions Required
+## ✅ 3. CocoaPods Script Warning - Fixed
 
-### 1. iOS Info.plist Location Permission
-**Status:** ⚠️ ACTION REQUIRED
+**Problem:** `[CP] Embed Pods Frameworks` script warning about missing outputs.
 
-**What to Do:**
-1. Generate iOS project (if not already done):
+**Solution:**
+- Added `inputPaths` to specify script dependencies:
+  - `${PODS_ROOT}/Target Support Files/Pods-App/Pods-App-frameworks.sh`
+  - `${BUILT_PRODUCTS_DIR}/${FRAMEWORKS_FOLDER_PATH}`
+- Added `outputPaths` to specify script outputs:
+  - `${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}`
+
+**File Modified:** `ios/App/App.xcodeproj/project.pbxproj`
+
+## Next Steps
+
+1. **Rebuild the web app:**
    ```bash
-   npx cap add ios
-   npx cap sync ios
+   npm run build
    ```
 
-2. Add location permission string to `ios/App/App/Info.plist`:
-   ```xml
-   <key>NSLocationWhenInUseUsageDescription</key>
-   <string>tastr uses your location to show nearby restaurants and calculate distances. Your location is not stored permanently.</string>
+2. **Reinstall CocoaPods dependencies** (required after Podfile changes):
+   ```bash
+   cd ios/App
+   pod install
+   cd ../..
    ```
 
-   **OR** use Xcode:
-   - Open project: `npx cap open ios`
-   - Navigate to `App` → `App` → `Info.plist`
-   - Add row: `Privacy - Location When In Use Usage Description`
-   - Value: `tastr uses your location to show nearby restaurants and calculate distances. Your location is not stored permanently.`
-
-**See:** `ios-setup-instructions.md` for detailed instructions
-
-### 2. Update App ID
-**Status:** ⚠️ ACTION REQUIRED
-
-**What to Do:**
-1. Register App ID in Apple Developer Portal:
-   - Go to https://developer.apple.com/account
-   - Certificates, Identifiers & Profiles → Identifiers
-   - Click "+" to create new App ID
-   - Use format: `net.tastr.app` or `com.yourcompany.tastr`
-
-2. Update `capacitor.config.ts`:
-   ```typescript
-   appId: 'your.registered.app.id', // Replace with your actual App ID
-   ```
-
-3. Sync changes:
+3. **Sync Capacitor:**
    ```bash
    npx cap sync ios
    ```
 
-## 📋 Next Steps Summary
+4. **Clean and rebuild in Xcode:**
+   - Open Xcode
+   - `Product → Clean Build Folder` (Shift+Cmd+K)
+   - `Product → Build` (Cmd+B)
 
-1. ✅ Development server URL removed (DONE)
-2. ⚠️ Update App ID in `capacitor.config.ts` (YOU NEED TO DO THIS)
-3. ⚠️ Generate iOS project and add location permission (YOU NEED TO DO THIS)
-4. ⚠️ Test on physical device
-5. ⚠️ Submit to App Store Connect
+5. **Verify fixes:**
+   - Orange plus button should be perfectly round
+   - No deprecation warnings in build log
+   - No CocoaPods script warnings
 
-## 📚 Reference Files
+## Notes
 
-- `APP_STORE_CHECKLIST.md` - Complete compliance checklist
-- `ios-setup-instructions.md` - Detailed iOS setup guide
-- `capacitor.config.ts` - Updated configuration file
-
-
-
-
-
-
+- The deprecation warnings are suppressed at the Pods level, which is the correct approach since they originate from third-party libraries
+- The orange button now uses a native button element to avoid any component-level styling conflicts
+- The CocoaPods script now properly declares inputs/outputs for incremental builds

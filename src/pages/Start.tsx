@@ -890,12 +890,20 @@ const Start = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       {/* Header */}
-      <div className="sticky top-0 bg-background/95 backdrop-blur-sm border-b border-border p-4 z-10">
-        <h1 className="tastr-logo text-3xl text-center">tastr.</h1>
+      <div 
+        className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border z-50"
+        style={{ 
+          paddingTop: `calc(1rem + env(safe-area-inset-top))`,
+          paddingBottom: '0.75rem',
+          paddingLeft: '1rem',
+          paddingRight: '1rem'
+        }}
+      >
+        <h1 className="tastr-logo text-2xl text-center">tastr.</h1>
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-8">
+      <div className="p-4 space-y-8 pt-20" style={{ paddingTop: `calc(5rem + env(safe-area-inset-top))` }}>
         {/* Nearby Restaurants Section */}
         <section>
           <div className="flex items-center justify-between mb-4">

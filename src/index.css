@@ -116,11 +116,25 @@ Updated: Ready for deployment
     @apply border-border;
   }
 
+  html {
+    /* Prevent iOS zooming and ensure proper scaling */
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    /* Ensure html fills viewport */
+    height: 100%;
+    height: -webkit-fill-available;
+  }
+
   body {
     @apply bg-background text-foreground font-serif;
     font-family: 'DM Serif Display', serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Prevent iOS bounce scrolling */
+    overscroll-behavior: none;
+    /* Ensure body fills viewport */
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
   }
 
   /* Mobile-first responsive typography */
@@ -177,7 +191,18 @@ Updated: Ready for deployment
 
   /* Mobile Navigation */
   .mobile-nav {
-    @apply fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border;
+    @apply fixed left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border;
+    /* Always position at bottom, just above home indicator */
+    bottom: 0;
+    /* Add safe area padding for iPhone home indicator - ensures nav stays above home bar */
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    padding-top: 0.5rem;
+    /* Ensure nav stays above content */
+    z-index: 1000;
+    /* Fixed height for consistent positioning */
+    height: calc(4rem + max(0.5rem, env(safe-area-inset-bottom)));
+    min-height: calc(4rem + max(0.5rem, env(safe-area-inset-bottom)));
+    max-height: calc(4rem + max(0.5rem, env(safe-area-inset-bottom)));
   }
   
   /* Fade Animation */
@@ -215,11 +240,22 @@ Updated: Ready for deployment
 
   /* Mobile safe area support for devices with dynamic island/notch */
   .safe-area-top {
-    padding-top: env(safe-area-inset-top);
+    padding-top: calc(0.75rem + env(safe-area-inset-top));
   }
 
   .safe-area-content {
+    /* Header height (approx 4rem) + safe area top */
     padding-top: calc(4rem + env(safe-area-inset-top));
+    /* Mobile nav height (4rem) + safe area bottom */
+    padding-bottom: calc(4rem + max(0.5rem, env(safe-area-inset-bottom)));
+  }
+
+  /* Page container with safe areas */
+  .page-container {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    padding-top: calc(4rem + env(safe-area-inset-top));
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom));
   }
 }
 

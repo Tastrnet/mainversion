@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, userData?: { username?: string; full_name?: string; app_context?: string }) => {
+  const signUp = async (email: string, password: string, userData?: { username?: string; full_name?: string; birth_year?: number; app_context?: string }) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
       

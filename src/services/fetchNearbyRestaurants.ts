@@ -166,14 +166,11 @@ export async function fetchNearbyRestaurants(
       lat,
       lng,
       radius,
+      cuisine_names: options?.cuisines?.length ? options.cuisines : null, // Always pass explicitly to avoid function overload ambiguity
     };
 
     if (typeof limit === "number" && Number.isFinite(limit) && limit > 0) {
       rpcPayload.limit_count = limit;
-    }
-
-    if (options?.cuisines?.length) {
-      rpcPayload.cuisine_names = options.cuisines;
     }
 
     const { data, error } = await supabase.rpc('get_nearby_restaurants', rpcPayload);
