@@ -23,3 +23,6 @@ The fix is in: `supabase/migrations/20251211021738_fix_stack_overflow_single_fun
 Run the migration in Supabase SQL Editor - it's already updated with the fix!
 
 
+
+
+

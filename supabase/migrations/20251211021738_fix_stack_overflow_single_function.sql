@@ -121,3 +121,4 @@ $$;
 -- Grant execute permission to anon and authenticated roles
 GRANT EXECUTE ON FUNCTION get_nearby_restaurants(double precision, double precision, int, int, text[]) TO anon, authenticated;
 
+npm run 

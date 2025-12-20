@@ -15,12 +15,7 @@ const MobileNavigation = () => {
   ];
 
   return (
-    <nav className="mobile-nav flex items-center justify-around px-1 z-50 relative">
-      {/* Logo in center */}
-      <div className="absolute left-1/2 top-2 transform -translate-x-1/2 bg-primary rounded-full p-2 shadow-lg z-10">
-        <div className="tastr-logo text-white text-xs font-bold">tastr.</div>
-      </div>
-
+    <nav className="mobile-nav flex items-center justify-around px-1">
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive = location.pathname === item.path;
@@ -31,30 +26,27 @@ const MobileNavigation = () => {
             <button
               key={item.path}
               onClick={() => navigate(item.path, { state: { fromMenu: true } })}
-              className="text-white border-0 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+              className="text-white"
               style={{ 
                 borderRadius: '50%',
                 width: '3rem',
                 height: '3rem',
-                minWidth: '3rem',
-                minHeight: '3rem',
-                maxWidth: '3rem',
-                maxHeight: '3rem',
+                aspectRatio: '1 / 1',
                 padding: 0,
                 margin: 0,
-                display: 'inline-flex',
+                display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                position: 'relative',
-                zIndex: 21,
                 overflow: 'hidden',
                 boxShadow: '0 4px 20px rgba(255, 109, 19, 0.25)',
                 backgroundColor: 'hsl(20, 100%, 54%)',
                 border: 'none',
                 outline: 'none',
+                boxSizing: 'border-box',
                 flexShrink: 0,
                 flexGrow: 0,
-                boxSizing: 'border-box'
+                clipPath: 'circle(50% at 50% 50%)',
+                WebkitClipPath: 'circle(50% at 50% 50%)'
               }}
             >
               <Icon size={20} style={{ display: 'block', flexShrink: 0 }} />

@@ -191,18 +191,23 @@ Updated: Ready for deployment
 
   /* Mobile Navigation */
   .mobile-nav {
-    @apply fixed left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border;
-    /* Always position at bottom, just above home indicator */
-    bottom: 0;
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    @apply bg-background/95 backdrop-blur-sm border-t border-border;
     /* Add safe area padding for iPhone home indicator - ensures nav stays above home bar */
     padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
     padding-top: 0.5rem;
-    /* Ensure nav stays above content */
-    z-index: 1000;
+    /* Ensure nav stays above ALL content - highest z-index */
+    z-index: 9999 !important;
     /* Fixed height for consistent positioning */
     height: calc(4rem + max(0.5rem, env(safe-area-inset-bottom)));
     min-height: calc(4rem + max(0.5rem, env(safe-area-inset-bottom)));
     max-height: calc(4rem + max(0.5rem, env(safe-area-inset-bottom)));
+    /* Ensure it's always visible */
+    display: flex !important;
+    visibility: visible !important;
   }
   
   /* Fade Animation */

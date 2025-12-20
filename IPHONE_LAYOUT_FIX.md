@@ -65,3 +65,6 @@ After rebuilding, test on:
 3. Verify headers and bottom nav are fully visible
 4. Check that content is not zoomed in
 
+
+
+

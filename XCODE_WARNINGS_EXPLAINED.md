@@ -69,3 +69,6 @@ If the warnings bother you:
 **These warnings are normal for Capacitor apps and don't affect functionality.** Your app will work perfectly fine. You can safely ignore them!
 
 
+
+
+
